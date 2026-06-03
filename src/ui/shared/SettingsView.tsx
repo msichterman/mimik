@@ -5,14 +5,17 @@ import { PRESET_LABELS, type PresetKey } from '@/core/blur/regexes';
 import { AI_PROVIDERS, type AIProviderKey } from '@/core/capture/ai/models';
 import { AI_LANGUAGES, type AILanguageCode } from '@/core/capture/ai/prompts';
 import { localStorage } from '@/lib/browser-api';
-import { Button } from '@/ui/components/ui/button';
-import { Input } from '@/ui/components/ui/input';
+import { Button } from '@/ui/components/button';
+import { Input } from '@/ui/components/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/components/select';
+import { Switch } from '@/ui/components/switch';
 
 interface SettingsViewProps {
   onBack?: () => void;
+  hideHeader?: boolean;
 }
 
-export default function SettingsView({ onBack }: SettingsViewProps) {
+export default function SettingsView({ onBack, hideHeader }: SettingsViewProps) {
   const [provider, setProvider] = useState<AIProviderKey>('openai');
   const [model, setModel] = useState(AI_PROVIDERS.openai.defaultModel);
   const [apiKey, setApiKey] = useState('');
@@ -62,17 +65,19 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
 
   return (
     <div className="bg-card flex flex-col">
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors"
-          >
-            <ArrowLeft size={16} />
-          </button>
-        )}
-        <h1 className="text-[15px] font-bold text-foreground">{i18n.t('settings.title')}</h1>
-      </div>
+      {!hideHeader && (
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors"
+            >
+              <ArrowLeft size={16} />
+            </button>
+          )}
+          <h1 className="text-[15px] font-bold text-foreground">{i18n.t('settings.title')}</h1>
+        </div>
+      )}
 
       <div className="flex-1 px-3 py-4 space-y-3">
         <div className="border border-border rounded-[10px] p-3.5 space-y-3">
@@ -87,32 +92,34 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
             <label className="block text-[11px] font-semibold text-foreground mb-1">
               {i18n.t('settings.provider')}
             </label>
-            <select
-              value={provider}
-              onChange={(e) => handleProviderChange(e.target.value as AIProviderKey)}
-              className="w-full border border-border rounded-lg px-3 py-2 text-[13px] text-foreground bg-card font-medium outline-none focus:border-ring focus:ring-2 focus:ring-ring/10"
-            >
-              {Object.entries(AI_PROVIDERS).map(([key, cfg]) => (
-                <option key={key} value={key}>
-                  {cfg.label}
-                </option>
-              ))}
-            </select>
+            <Select value={provider} onValueChange={(v) => handleProviderChange(v as AIProviderKey)}>
+              <SelectTrigger className="w-full text-[13px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(AI_PROVIDERS).map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>
+                    {cfg.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
             <label className="block text-[11px] font-semibold text-foreground mb-1">{i18n.t('settings.model')}</label>
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full border border-border rounded-lg px-3 py-2 text-[13px] text-foreground bg-card font-medium outline-none focus:border-ring focus:ring-2 focus:ring-ring/10"
-            >
-              {providerConfig.models.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
+            <Select value={model} onValueChange={setModel}>
+              <SelectTrigger className="w-full text-[13px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {providerConfig.models.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -125,17 +132,18 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
               <Globe size={11} className="inline mr-1 -mt-px" />
               {i18n.t('settings.aiLanguage')}
             </label>
-            <select
-              value={aiLanguage}
-              onChange={(e) => setAiLanguage(e.target.value as AILanguageCode)}
-              className="w-full border border-border rounded-lg px-3 py-2 text-[13px] text-foreground bg-card font-medium outline-none focus:border-ring focus:ring-2 focus:ring-ring/10"
-            >
-              {AI_LANGUAGES.map((lang) => (
-                <option key={lang.code} value={lang.code}>
-                  {lang.label}
-                </option>
-              ))}
-            </select>
+            <Select value={aiLanguage} onValueChange={(v) => setAiLanguage(v as AILanguageCode)}>
+              <SelectTrigger className="w-full text-[13px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {AI_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -153,24 +161,16 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
               className={`flex items-center justify-between py-2 ${i < arr.length - 1 ? 'border-b border-secondary' : ''}`}
             >
               <span className="text-xs font-medium text-foreground">{i18n.t(BLUR_PRESET_I18N[key])}</span>
-              <button
-                onClick={() =>
+              <Switch
+                checked={blurPresets[key]}
+                onCheckedChange={(checked) =>
                   setBlurPresets((prev) => {
-                    const next = { ...prev, [key]: !prev[key] };
+                    const next = { ...prev, [key]: checked };
                     localStorage.set({ blurPresets: next });
                     return next;
                   })
                 }
-                className={`w-9 h-5 rounded-full transition-colors relative ${
-                  blurPresets[key] ? 'bg-accent' : 'bg-border'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
-                    blurPresets[key] ? 'translate-x-4' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+              />
             </div>
           ))}
         </div>

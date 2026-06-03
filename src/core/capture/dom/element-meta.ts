@@ -26,7 +26,8 @@ export function extractElementMeta(el: HTMLElement): ElementMeta {
   const rect = el.getBoundingClientRect();
   let cssSelector: string;
   try {
-    cssSelector = getCssSelector(el);
+    const root = el.getRootNode();
+    cssSelector = getCssSelector(el, root instanceof ShadowRoot ? { root } : undefined);
   } catch {
     cssSelector = el.tagName?.toLowerCase() ?? 'unknown';
   }

@@ -72,6 +72,20 @@ export default function GuideContent({ guideId }: GuideContentProps) {
     return onGuidesChanged(() => loadGuide());
   }, [loadGuide]);
 
+  // Safety fallback: if the title is still untitled after 35s (service worker died
+  // or AI call was never resolved), drop to editable state so the user isn't stuck forever.
+  useEffect(() => {
+    if (title !== i18n.t('fullview_untitledGuide')) return;
+    const timer = setTimeout(async () => {
+      await loadGuide();
+      if (titleRef.current === i18n.t('fullview_untitledGuide')) {
+        titleRef.current = '';
+        setTitle('');
+      }
+    }, 35000);
+    return () => clearTimeout(timer);
+  }, [title, loadGuide]);
+
   const handleTitleBlur = useCallback(async () => {
     if (!data || title === data.guide.title) return;
     await updateGuideTitle(guideId, title);
@@ -150,8 +164,19 @@ export default function GuideContent({ guideId }: GuideContentProps) {
         }
       >
         {title === i18n.t('fullview_untitledGuide') && !typingTitle && data.steps.length > 0 ? (
-          <div className="text-[32px] font-extrabold leading-tight animate-gradient-text bg-[length:300%_100%] bg-clip-text text-transparent bg-gradient-to-r from-muted-foreground via-violet to-muted-foreground max-w-[480px]">
-            {i18n.t('fullview_writingTitle')}
+          <div className="group flex items-start gap-3">
+            <div className="text-[32px] font-extrabold leading-tight animate-gradient-text bg-[length:300%_100%] bg-clip-text text-transparent bg-gradient-to-r from-muted-foreground via-violet to-muted-foreground max-w-[480px]">
+              {i18n.t('fullview_writingTitle')}
+            </div>
+            <button
+              onClick={() => {
+                titleRef.current = '';
+                setTitle('');
+              }}
+              className="mt-2 text-[11px] font-medium text-muted-foreground hover:text-accent opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+            >
+              {i18n.t('fullview_nameTitleManually')}
+            </button>
           </div>
         ) : typingTitle ? (
           <div className="relative text-[32px] font-extrabold leading-tight">

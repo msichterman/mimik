@@ -1,9 +1,14 @@
+import { ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { browser, i18n } from '#imports';
 import { PRESET_LABELS, type PresetKey } from '@/core/blur/regexes';
 import { AI_PROVIDERS, type AIProviderKey } from '@/core/capture/ai/models';
 import { AI_LANGUAGES, type AILanguageCode } from '@/core/capture/ai/prompts';
 import { localStorage, requestHostPermissions } from '@/lib/browser-api';
+import { Button } from '@/ui/components/button';
+import { Input } from '@/ui/components/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/components/select';
+import { Switch } from '@/ui/components/switch';
 
 const BLUR_PRESET_I18N: Record<PresetKey, string> = {
   email: 'email',
@@ -69,23 +74,10 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
           <p className="text-base text-muted-foreground leading-relaxed mb-10 max-w-md">
             {i18n.t('onboarding.welcomeMessage')}
           </p>
-          <button
-            onClick={onNext}
-            className="inline-flex items-center gap-2 px-7 py-3 bg-accent text-white rounded-xl font-semibold text-sm hover:bg-accent/90 transition-colors"
-          >
+          <Button onClick={onNext} className="gap-2 px-7 h-auto py-3 rounded-xl text-sm">
             {i18n.t('onboarding.getStarted')}
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </button>
+            <ArrowRight size={16} />
+          </Button>
         </div>
       </div>
       <div className="w-1/2 bg-deep flex items-center justify-center relative overflow-hidden">
@@ -135,76 +127,67 @@ function AISetupStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
               <label className="block text-xs font-semibold text-foreground mb-1.5">
                 {i18n.t('settings.provider')}
               </label>
-              <select
-                value={provider}
-                onChange={(e) => handleProviderChange(e.target.value as AIProviderKey)}
-                className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-foreground bg-card font-medium outline-none focus:border-accent focus:ring-2 focus:ring-accent/10"
-              >
-                {Object.entries(AI_PROVIDERS).map(([key, cfg]) => (
-                  <option key={key} value={key}>
-                    {cfg.label}
-                  </option>
-                ))}
-              </select>
+              <Select value={provider} onValueChange={(v) => handleProviderChange(v as AIProviderKey)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(AI_PROVIDERS).map(([key, cfg]) => (
+                    <SelectItem key={key} value={key}>
+                      {cfg.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-foreground mb-1.5">{i18n.t('settings.model')}</label>
-              <select
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-foreground bg-card font-medium outline-none focus:border-accent focus:ring-2 focus:ring-accent/10"
-              >
-                {providerConfig.models.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
+              <Select value={model} onValueChange={setModel}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {providerConfig.models.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-foreground mb-1.5">{i18n.t('settings.apiKey')}</label>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sk-..."
-                className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-foreground bg-card font-medium outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 placeholder:text-muted-foreground/50"
-              />
+              <Input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="sk-..." />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-foreground mb-1.5">
                 {i18n.t('settings.aiLanguage')}
               </label>
-              <select
-                value={aiLanguage}
-                onChange={(e) => setAiLanguage(e.target.value as AILanguageCode)}
-                className="w-full border border-border rounded-xl px-4 py-2.5 text-sm text-foreground bg-card font-medium outline-none focus:border-accent focus:ring-2 focus:ring-accent/10"
-              >
-                {AI_LANGUAGES.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.label}
-                  </option>
-                ))}
-              </select>
+              <Select value={aiLanguage} onValueChange={(v) => setAiLanguage(v as AILanguageCode)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AI_LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleContinue}
-              className="px-8 py-3 bg-accent text-white rounded-xl font-semibold text-sm hover:bg-accent/90 transition-colors"
-            >
+            <Button onClick={handleContinue} className="px-8 h-auto py-3 rounded-xl">
               {i18n.t('common.continue')}
-            </button>
-            <button
-              onClick={onSkip}
-              className="px-6 py-3 text-muted-foreground rounded-xl font-semibold text-sm hover:text-foreground transition-colors"
-            >
+            </Button>
+            <Button variant="ghost" onClick={onSkip} className="px-6 h-auto py-3 rounded-xl">
               {i18n.t('common.skip')}
-            </button>
+            </Button>
           </div>
 
           <div className="mt-6">
@@ -288,7 +271,7 @@ function SmartBlurStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => v
     macAddress: false,
   });
 
-  const handleToggle = (key: PresetKey) => {
+  const _handleToggle = (key: PresetKey) => {
     setBlurPresets((prev) => {
       const next = { ...prev, [key]: !prev[key] };
       localStorage.set({ blurPresets: next });
@@ -317,35 +300,27 @@ function SmartBlurStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => v
                 <span className="text-sm font-medium text-foreground">
                   {i18n.t(`blurPresets.${BLUR_PRESET_I18N[key]}`)}
                 </span>
-                <button
-                  onClick={() => handleToggle(key)}
-                  className={`w-11 h-6 rounded-full transition-colors relative ${
-                    blurPresets[key] ? 'bg-accent' : 'bg-border'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-                      blurPresets[key] ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
+                <Switch
+                  checked={blurPresets[key]}
+                  onCheckedChange={(checked) => {
+                    setBlurPresets((prev) => {
+                      const next = { ...prev, [key]: checked };
+                      localStorage.set({ blurPresets: next });
+                      return next;
+                    });
+                  }}
+                />
               </div>
             ))}
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={onNext}
-              className="px-8 py-3 bg-accent text-white rounded-xl font-semibold text-sm hover:bg-accent/90 transition-colors"
-            >
+            <Button onClick={onNext} className="px-8 h-auto py-3 rounded-xl">
               {i18n.t('common.continue')}
-            </button>
-            <button
-              onClick={onSkip}
-              className="px-6 py-3 text-muted-foreground rounded-xl font-semibold text-sm hover:text-foreground transition-colors"
-            >
+            </Button>
+            <Button variant="ghost" onClick={onSkip} className="px-6 h-auto py-3 rounded-xl">
               {i18n.t('common.skip')}
-            </button>
+            </Button>
           </div>
 
           <div className="mt-6">
@@ -455,18 +430,12 @@ function PinExtensionStep({ onNext, onSkip }: { onNext: () => void; onSkip: () =
           </ol>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={onNext}
-              className="px-8 py-3 bg-accent text-white rounded-xl font-semibold text-sm hover:bg-accent/90 transition-colors"
-            >
+            <Button onClick={onNext} className="px-8 h-auto py-3 rounded-xl">
               {i18n.t('common.continue')}
-            </button>
-            <button
-              onClick={onSkip}
-              className="px-6 py-3 text-muted-foreground rounded-xl font-semibold text-sm hover:text-foreground transition-colors"
-            >
+            </Button>
+            <Button variant="ghost" onClick={onSkip} className="px-6 h-auto py-3 rounded-xl">
               {i18n.t('common.skip')}
-            </button>
+            </Button>
           </div>
 
           <div className="mt-6">
@@ -568,23 +537,10 @@ function DoneStep() {
           ))}
         </div>
 
-        <button
-          onClick={handleOpen}
-          className="inline-flex items-center gap-2 px-7 py-3 bg-accent text-white rounded-xl font-semibold text-sm hover:bg-accent/90 transition-colors"
-        >
+        <Button onClick={handleOpen} className="gap-2 px-7 h-auto py-3 rounded-xl text-sm">
           {i18n.t('onboarding.openMimik')}
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
-        </button>
+          <ArrowRight size={16} />
+        </Button>
       </div>
     </div>
   );

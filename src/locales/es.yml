@@ -108,6 +108,7 @@ fullview:
   guideMe: "¡Guíame!"
   untitledGuide: Guía sin título
   writingTitle: Escribiendo un título con tus pasos capturados...
+  nameTitleManually: Nómbralo tú mismo
   guideNotFound: "No se encontró la guía."
   stepCount: "$1 paso"
   stepCountPlural: "$1 pasos"
