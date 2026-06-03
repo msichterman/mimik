@@ -139,12 +139,34 @@ export default defineBackground(() => {
     await waitUntilReady();
     const actor = getActor();
     const guideId = actor.getSnapshot().context.currentGuideId;
+
+    const insertData = await localStorage.get(['insertContext']);
+    const wasInsertMode = !!insertData.insertContext;
+    await localStorage.set({ insertContext: null });
+
     await broadcastStopCapture();
     actor.send({ type: 'STOP_RECORDING' });
 
-    if (guideId) generateTitleInBackground(guideId);
+    if (guideId && !wasInsertMode) generateTitleInBackground(guideId);
 
     return { success: true, guideId: guideId ?? undefined };
+  });
+
+  onMessage('startInsertRecording', async ({ data }) => {
+    await waitUntilReady();
+    const actor = getActor();
+    await localStorage.set({
+      insertContext: { guideId: data.guideId, nextInsertIndex: data.afterStepIndex + 1 },
+    });
+    actor.send({ type: 'START_RECORDING', url: data.stepUrl, guideId: data.guideId });
+
+    const activeTab = await getActiveTab();
+    if (activeTab?.id && data.stepUrl) {
+      await updateTab(activeTab.id, { url: data.stepUrl });
+    }
+
+    await broadcastStartCapture(data.guideId);
+    return { started: true };
   });
 
   onMessage('enterBlurMode', async () => {

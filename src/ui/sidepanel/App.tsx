@@ -24,11 +24,19 @@ import GuideEditor from './GuideEditor';
 import GuideMeCompletion from './GuideMeCompletion';
 import GuideMeView from './GuideMeView';
 import LibraryView from './LibraryView';
+import RecordingView from './RecordingView';
 
 type Tab = 'library' | 'chat' | 'settings';
 
 type Overlay =
   | { name: 'editor'; guideId: string }
+  | {
+      name: 'insert-recording';
+      guideId: string;
+      afterStepIndex: number;
+      afterStepDescription: string;
+      startedAt: number;
+    }
   | { name: 'guideme'; guideId: string }
   | { name: 'guideme-done'; guideId: string }
   | null;
@@ -193,6 +201,23 @@ export default function App() {
     }
   }, []);
 
+  if (overlay?.name === 'insert-recording') {
+    const { guideId: insertGuideId, afterStepIndex, afterStepDescription, startedAt } = overlay;
+    return (
+      <RecordingView
+        guideId={insertGuideId}
+        insertMode={{ afterStepIndex, afterStepDescription, startedAt }}
+        onStop={async () => {
+          try {
+            await sendMessage('stopRecording', undefined);
+          } catch {}
+          setIsRecording(false);
+          setOverlay({ name: 'editor', guideId: insertGuideId });
+        }}
+      />
+    );
+  }
+
   // Full-screen overlays (editor, guideme) still take over
   if (overlay?.name === 'guideme') {
     return (
@@ -224,6 +249,9 @@ export default function App() {
         guideId={overlay.guideId}
         onBack={() => setOverlay(null)}
         onGuideMe={(id) => setOverlay({ name: 'guideme', guideId: id })}
+        onInsertStep={({ guideId, afterStepIndex, afterStepDescription, startedAt }) =>
+          setOverlay({ name: 'insert-recording', guideId, afterStepIndex, afterStepDescription, startedAt })
+        }
       />
     );
   }
