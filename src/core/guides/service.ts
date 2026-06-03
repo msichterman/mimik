@@ -81,6 +81,25 @@ export async function addStepToGuide(guideId: string, stepId: string): Promise<v
   }
 }
 
+export async function insertStepInGuide(guideId: string, stepId: string, atIndex: number): Promise<void> {
+  await db.transaction('rw', db.steps, db.guides, async () => {
+    const stepsToShift = await db.steps
+      .where('guideId')
+      .equals(guideId)
+      .filter((s) => s.index >= atIndex && s.id !== stepId)
+      .toArray();
+    for (const s of stepsToShift) {
+      await db.steps.update(s.id, { index: s.index + 1 });
+    }
+    const guide = await db.guides.get(guideId);
+    if (guide) {
+      const newStepIds = [...guide.stepIds];
+      newStepIds.splice(atIndex, 0, stepId);
+      await db.guides.update(guideId, { stepIds: newStepIds, updatedAt: Date.now() });
+    }
+  });
+}
+
 export async function toggleStar(id: string): Promise<boolean> {
   const guide = await db.guides.get(id);
   if (!guide) return false;

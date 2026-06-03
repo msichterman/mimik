@@ -1,4 +1,4 @@
-import { ArrowLeft, Layers, Maximize2, Play } from 'lucide-react';
+import { ArrowLeft, Layers, Maximize2, Play, Plus } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '#imports';
 import {
@@ -24,6 +24,7 @@ interface GuideEditorProps {
   guideId: string;
   onBack: () => void;
   onGuideMe?: (guideId: string) => void;
+  onInsertStep?: (data: { guideId: string; afterStepIndex: number }) => void;
 }
 
 interface GuideData {
@@ -32,7 +33,7 @@ interface GuideData {
   screenshots: Map<string, Screenshot>;
 }
 
-export default function GuideEditor({ guideId, onBack, onGuideMe }: GuideEditorProps) {
+export default function GuideEditor({ guideId, onBack, onGuideMe, onInsertStep }: GuideEditorProps) {
   const [data, setData] = useState<GuideData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -85,6 +86,18 @@ export default function GuideEditor({ guideId, onBack, onGuideMe }: GuideEditorP
       }
     },
     [guideId, loadGuide],
+  );
+
+  const handleInsertStep = useCallback(
+    async (step: Step, stepIdx: number) => {
+      await sendMessage('startInsertRecording', {
+        guideId,
+        afterStepIndex: stepIdx,
+        stepUrl: step.url || '',
+      });
+      onInsertStep?.({ guideId, afterStepIndex: stepIdx });
+    },
+    [guideId, onInsertStep],
   );
 
   const handleBlurSave = useCallback(
@@ -237,6 +250,18 @@ export default function GuideEditor({ guideId, onBack, onGuideMe }: GuideEditorP
                   },
                 }}
               />
+              {idx < data.steps.length - 1 && (
+                <div className="group/insert relative flex items-center justify-center h-6 my-0.5">
+                  <div className="absolute inset-x-0 h-px bg-border opacity-0 group-hover/insert:opacity-100 transition-opacity" />
+                  <button
+                    onClick={() => handleInsertStep(step, idx)}
+                    title="Insert step here"
+                    className="relative z-10 flex items-center justify-center w-5 h-5 rounded-full border border-border bg-card text-muted-foreground opacity-0 group-hover/insert:opacity-100 hover:!opacity-100 hover:border-accent hover:text-accent hover:bg-secondary transition-all shadow-sm"
+                  >
+                    <Plus size={10} />
+                  </button>
+                </div>
+              )}
             </div>
           ))
         )}

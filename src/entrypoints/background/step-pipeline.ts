@@ -3,12 +3,23 @@ import type { DOMContext } from '@/core/capture/dom/context';
 import { CaptureState } from '@/core/capture/machine';
 import { buildFallbackDescription } from '@/core/capture/step-description';
 import { db } from '@/core/guides/db';
-import { addStepToGuide, createStep, saveScreenshot, updateStepDescription } from '@/core/guides/service';
+import {
+  addStepToGuide,
+  createStep,
+  insertStepInGuide,
+  saveScreenshot,
+  updateStepDescription,
+} from '@/core/guides/service';
 import type { ElementMeta, Screenshot, Step } from '@/core/guides/types';
 import { captureVisibleTab, localStorage } from '@/lib/browser-api';
 import { logger } from '@/lib/logger';
 import type { CaptureStepData, CaptureStepResponse } from '@/lib/messaging';
 import { getActor } from './actor';
+
+interface InsertContext {
+  guideId: string;
+  nextInsertIndex: number;
+}
 
 async function takeScreenshot(stepId: string, meta: ElementMeta): Promise<string | undefined> {
   try {
@@ -48,7 +59,10 @@ export async function handleCaptureStep(data: CaptureStepData): Promise<CaptureS
   const snap = getActor().getSnapshot();
   if (snap.value !== CaptureState.RECORDING) return { ignored: true };
 
-  const stepIndex = snap.context.stepCount;
+  const insertData = await localStorage.get(['insertContext']);
+  const insertCtx = (insertData.insertContext as InsertContext) ?? null;
+
+  const stepIndex = insertCtx ? insertCtx.nextInsertIndex : snap.context.stepCount;
   getActor().send({ type: 'USER_ACTION' });
 
   const guideId = snap.context.currentGuideId!;
@@ -67,7 +81,13 @@ export async function handleCaptureStep(data: CaptureStepData): Promise<CaptureS
     screenshotId,
     elementMeta: data.elementMeta,
   });
-  await addStepToGuide(guideId, stepId);
+
+  if (insertCtx) {
+    await insertStepInGuide(guideId, stepId, stepIndex);
+    await localStorage.set({ insertContext: { ...insertCtx, nextInsertIndex: stepIndex + 1 } });
+  } else {
+    await addStepToGuide(guideId, stepId);
+  }
 
   if (data.action !== 'input' && data.domContext) {
     try {

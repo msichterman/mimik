@@ -8,7 +8,7 @@ export const CaptureState = {
 export type CaptureStateValue = (typeof CaptureState)[keyof typeof CaptureState];
 
 type CaptureEvent =
-  | { type: 'START_RECORDING'; url?: string }
+  | { type: 'START_RECORDING'; url?: string; guideId?: string }
   | { type: 'STOP_RECORDING' }
   | { type: 'USER_ACTION' }
   | { type: 'URL_CHANGED'; url: string };
@@ -37,7 +37,7 @@ export const captureMachine = createMachine({
         START_RECORDING: {
           target: CaptureState.RECORDING,
           actions: assign({
-            currentGuideId: () => crypto.randomUUID(),
+            currentGuideId: ({ event }) => event.guideId ?? crypto.randomUUID(),
             stepCount: 0,
             currentUrl: ({ event }) => event.url ?? '',
           }),

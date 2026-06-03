@@ -12,6 +12,7 @@ import ZoomScreenshot from './ZoomScreenshot';
 interface RecordingViewProps {
   guideId: string;
   onStop: () => void;
+  insertMode?: { afterStepIndex: number };
 }
 
 function timeAgo(createdAt: number): string {
@@ -26,7 +27,7 @@ interface LiveStep {
   screenshot?: Screenshot;
 }
 
-export default function RecordingView({ guideId, onStop }: RecordingViewProps) {
+export default function RecordingView({ guideId, onStop, insertMode }: RecordingViewProps) {
   const [steps, setSteps] = useState<LiveStep[]>([]);
   const [siteUrl, setSiteUrl] = useState('');
   const [isBlurring, setIsBlurring] = useState(false);
@@ -102,14 +103,18 @@ export default function RecordingView({ guideId, onStop }: RecordingViewProps) {
   return (
     <div className="flex flex-col h-screen bg-card relative">
       {/* Floating recording pill */}
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-border shadow-sm">
-        <span className={`w-2 h-2 rounded-full ${isBlurring ? 'bg-accent' : 'bg-destructive animate-pulse'}`} />
-        <span className="text-xs font-semibold text-foreground">
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-border shadow-sm max-w-[90%]">
+        <span
+          className={`shrink-0 w-2 h-2 rounded-full ${isBlurring ? 'bg-accent' : 'bg-destructive animate-pulse'}`}
+        />
+        <span className="text-xs font-semibold text-foreground truncate">
           {isBlurring
             ? i18n.t('recording.capturePaused')
-            : steps.length === 1
-              ? i18n.t('recording.recording', [String(steps.length)])
-              : i18n.t('recording.recordingPlural', [String(steps.length)])}
+            : insertMode
+              ? `Inserting after step ${insertMode.afterStepIndex + 1}`
+              : steps.length === 1
+                ? i18n.t('recording.recording', [String(steps.length)])
+                : i18n.t('recording.recordingPlural', [String(steps.length)])}
         </span>
       </div>
 
@@ -185,7 +190,7 @@ export default function RecordingView({ guideId, onStop }: RecordingViewProps) {
       <div className="shrink-0 border-t border-border px-4 py-2.5 flex items-center gap-2">
         <Button onClick={onStop} className="flex-1 h-10 rounded-full font-semibold text-[13px]">
           <Check size={16} strokeWidth={3} />
-          {i18n.t('recording.finishRecording')}
+          {insertMode ? 'Done inserting' : i18n.t('recording.finishRecording')}
         </Button>
         <button
           onClick={handleBlur}

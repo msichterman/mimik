@@ -81,6 +81,16 @@ export interface GuideMe_PrevResponse {
   moved: boolean;
 }
 
+export interface StartInsertRecordingData {
+  guideId: string;
+  afterStepIndex: number;
+  stepUrl: string;
+}
+
+export interface StartInsertRecordingResponse {
+  started: boolean;
+}
+
 export interface EnterBlurModeResponse {
   entered: boolean;
 }
@@ -100,6 +110,7 @@ interface MimikProtocol {
   guideMeStepCompleted(data: GuideMeStepCompletedData): GuideMeStepCompletedResponse;
   guideMeCancel(): GuideMe_CancelResponse;
   guideMePrev(data: GuideMe_PrevData): GuideMe_PrevResponse;
+  startInsertRecording(data: StartInsertRecordingData): StartInsertRecordingResponse;
   enterBlurMode(): EnterBlurModeResponse;
   exitBlurMode(): ExitBlurModeResponse;
 }
