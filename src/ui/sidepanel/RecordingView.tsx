@@ -6,7 +6,7 @@ import type { Screenshot, Step } from '@/core/guides/types';
 import { getActiveTab } from '@/lib/browser-api';
 import { sendMessage } from '@/lib/messaging';
 import { extractDomain } from '@/lib/utils';
-import { Button } from '@/ui/components/ui/button';
+import { Button } from '@/ui/components/button';
 import ZoomScreenshot from './ZoomScreenshot';
 
 interface RecordingViewProps {

@@ -7,6 +7,8 @@ import { getGuide } from '@/core/guides/service';
 import type { Guide, Screenshot, Step } from '@/core/guides/types';
 import { sendMessage } from '@/lib/messaging';
 import { extractDomain } from '@/lib/utils';
+import { Button } from '@/ui/components/button';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/ui/components/dialog';
 import FaviconImg from '@/ui/shared/FaviconImg';
 
 interface GuideMeViewProps {
@@ -36,29 +38,33 @@ function SadMascot() {
   );
 }
 
-function ExitConfirmation({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: () => void }) {
+function ExitConfirmation({
+  open,
+  onCancel,
+  onConfirm,
+}: {
+  open: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-card/80 backdrop-blur-[2px]">
-      <div className="bg-card rounded-2xl border border-border shadow-lg p-6 w-[280px] text-center flex flex-col items-center">
-        <SadMascot />
-        <h3 className="text-[15px] font-bold text-foreground mt-3 mb-1">{i18n.t('guideme.exitTitle')}</h3>
-        <p className="text-[12px] text-muted-foreground leading-relaxed mb-5">{i18n.t('guideme.exitMessage')}</p>
-        <div className="flex gap-2.5 w-full">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-2.5 rounded-lg font-semibold text-sm bg-secondary text-foreground hover:bg-secondary/80 transition-colors"
-          >
-            {i18n.t('guideme.stay')}
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-lg font-semibold text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            {i18n.t('guideme.exit')}
-          </button>
+    <Dialog open={open} onOpenChange={(v) => !v && onCancel()}>
+      <DialogContent showCloseButton={false} className="max-w-[300px] p-6 text-center">
+        <div className="flex justify-center mb-1">
+          <SadMascot />
         </div>
-      </div>
-    </div>
+        <DialogTitle className="text-center text-[15px]">{i18n.t('guideme.exitTitle')}</DialogTitle>
+        <DialogDescription className="text-center text-[12px]">{i18n.t('guideme.exitMessage')}</DialogDescription>
+        <div className="flex gap-2.5 mt-2">
+          <Button variant="secondary" className="flex-1" onClick={onCancel}>
+            {i18n.t('guideme.stay')}
+          </Button>
+          <Button className="flex-1" onClick={onConfirm}>
+            {i18n.t('guideme.exit')}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -160,7 +166,7 @@ export default function GuideMeView({ guideId, onExit, onComplete }: GuideMeView
 
   return (
     <div className="min-h-screen bg-card flex flex-col relative">
-      {showExitConfirm && <ExitConfirmation onCancel={() => setShowExitConfirm(false)} onConfirm={onExit} />}
+      <ExitConfirmation open={showExitConfirm} onCancel={() => setShowExitConfirm(false)} onConfirm={onExit} />
       <div className="px-4 pt-3 pb-2 flex items-center gap-2">
         <button
           onClick={() => setShowExitConfirm(true)}

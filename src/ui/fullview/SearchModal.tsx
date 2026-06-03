@@ -5,8 +5,8 @@ import { getGuideDomain, getGuides } from '@/core/guides/service';
 import type { Guide } from '@/core/guides/types';
 
 import { useFullview } from '@/stores/fullview';
-import { Dialog, DialogPortal } from '@/ui/components/ui/dialog';
-import { Input } from '@/ui/components/ui/input';
+import { Dialog, DialogPortal } from '@/ui/components/dialog';
+import { Input } from '@/ui/components/input';
 import KeyboardHints from './components/KeyboardHints';
 import SearchResults from './components/SearchResults';
 import { navigate } from './router';
