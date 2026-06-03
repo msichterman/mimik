@@ -29,7 +29,13 @@ type View =
   | { name: 'library' }
   | { name: 'editor'; guideId: string }
   | { name: 'recording'; guideId: string }
-  | { name: 'insert-recording'; guideId: string; afterStepIndex: number }
+  | {
+      name: 'insert-recording';
+      guideId: string;
+      afterStepIndex: number;
+      afterStepDescription: string;
+      startedAt: number;
+    }
   | { name: 'settings' }
   | { name: 'guideme'; guideId: string }
   | { name: 'guideme-done'; guideId: string };
@@ -173,11 +179,11 @@ export default function App() {
   }
 
   if (view.name === 'insert-recording') {
-    const { guideId: insertGuideId, afterStepIndex } = view;
+    const { guideId: insertGuideId, afterStepIndex, afterStepDescription, startedAt } = view;
     return (
       <RecordingView
         guideId={insertGuideId}
-        insertMode={{ afterStepIndex }}
+        insertMode={{ afterStepIndex, afterStepDescription, startedAt }}
         onStop={async () => {
           try {
             await sendMessage('stopRecording', undefined);
@@ -221,7 +227,9 @@ export default function App() {
         guideId={view.guideId}
         onBack={() => setView({ name: 'library' })}
         onGuideMe={(id) => setView({ name: 'guideme', guideId: id })}
-        onInsertStep={({ guideId, afterStepIndex }) => setView({ name: 'insert-recording', guideId, afterStepIndex })}
+        onInsertStep={({ guideId, afterStepIndex, afterStepDescription, startedAt }) =>
+          setView({ name: 'insert-recording', guideId, afterStepIndex, afterStepDescription, startedAt })
+        }
       />
     );
   }
