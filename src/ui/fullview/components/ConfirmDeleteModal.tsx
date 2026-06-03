@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { i18n } from '#imports';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/ui/components/ui/dialog';
+import { Button } from '@/ui/components/button';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/ui/components/dialog';
 
 interface ConfirmDeleteModalProps {
   open: boolean;
@@ -20,18 +21,12 @@ export default function ConfirmDeleteModal({ open, onClose, onConfirm }: Confirm
         <DialogTitle className="text-center text-base">{i18n.t('confirmDelete_title')}</DialogTitle>
         <DialogDescription className="text-center">{i18n.t('confirmDelete_message')}</DialogDescription>
         <div className="flex flex-col gap-2 mt-2">
-          <button
-            onClick={onConfirm}
-            className="w-full py-2.5 rounded-lg bg-destructive text-white text-sm font-semibold hover:bg-destructive/90 transition-colors"
-          >
+          <Button variant="destructive" className="w-full" onClick={onConfirm}>
             {i18n.t('confirmDelete_confirm')}
-          </button>
-          <button
-            onClick={onClose}
-            className="w-full py-2.5 rounded-lg bg-secondary text-foreground text-sm font-semibold hover:bg-lavender transition-colors"
-          >
+          </Button>
+          <Button variant="secondary" className="w-full" onClick={onClose}>
             {i18n.t('common_cancel')}
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

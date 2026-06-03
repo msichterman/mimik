@@ -6,6 +6,7 @@ export default defineConfig({
   srcDir: "src",
   imports: false,
   webExt: {
+    disabled: process.env.WXT_NO_BROWSER === '1',
     chromiumArgs: ['--user-data-dir=/tmp/mimik-dev-profile', '--window-size=1280,800', '--window-position=0,0', '--force-device-scale-factor=1.25'],
   },
   zip: {

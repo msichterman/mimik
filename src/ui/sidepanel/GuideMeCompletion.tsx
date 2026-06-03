@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { i18n } from '#imports';
 import { getStepsForGuide } from '@/core/guides/service';
 import type { Step } from '@/core/guides/types';
+import { Button } from '@/ui/components/button';
 
 interface GuideMeCompletionProps {
   guideId: string;
@@ -64,18 +65,12 @@ export default function GuideMeCompletion({ guideId, onDone, onRunAgain }: Guide
       </div>
 
       <div className="flex gap-2.5 py-5">
-        <button
-          onClick={onDone}
-          className="flex-1 py-3.5 rounded-lg font-semibold text-sm bg-secondary border border-border text-foreground hover:bg-secondary/80 transition-colors"
-        >
+        <Button variant="outline" className="flex-1 h-auto py-3.5" onClick={onDone}>
           {i18n.t('guidemeCompletion.allDone')}
-        </button>
-        <button
-          onClick={() => onRunAgain(guideId)}
-          className="flex-1 py-3.5 rounded-lg font-semibold text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
+        </Button>
+        <Button className="flex-1 h-auto py-3.5" onClick={() => onRunAgain(guideId)}>
           {i18n.t('guidemeCompletion.runAgain')}
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@
     "components": "@/ui/components",
     "utils": "@/lib/utils",
     "hooks": "@/lib/hooks",
-    "ui": "@/ui/components/ui"
+    "ui": "@/ui/components"
   },
   "iconLibrary": "lucide"
 }

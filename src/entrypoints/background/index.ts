@@ -25,7 +25,15 @@ async function generateTitleInBackground(guideId: string) {
 
     const steps = await getStepsForGuide(guideId);
     const allSteps = steps.filter((s) => s.description).map((s) => ({ description: s.description, url: s.url }));
-    if (allSteps.length === 0) return;
+    if (allSteps.length === 0) {
+      const domain = await getGuideDomain(guideId);
+      await updateGuideTitle(
+        guideId,
+        domain ? i18n.t('background.guideOnDomain', [domain]) : i18n.t('background.newGuide'),
+      );
+      return;
+    }
+
     const stepsWithUrl = allSteps.length > 15 ? [...allSteps.slice(0, 10), ...allSteps.slice(-5)] : allSteps;
 
     const provider = (settings.aiProvider as string) || 'openai';

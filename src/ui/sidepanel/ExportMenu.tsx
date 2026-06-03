@@ -5,7 +5,7 @@ import { exportGuideAsHTML } from '@/core/export/html-export';
 import { exportGuideAsMarkdown } from '@/core/export/markdown-export';
 import { exportGuideAsPDF } from '@/core/export/pdf-export';
 import type { Guide, Screenshot, Step } from '@/core/guides/types';
-import { Button } from '@/ui/components/ui/button';
+import { Button } from '@/ui/components/button';
 
 interface ExportMenuProps {
   guideId: string;

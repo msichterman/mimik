@@ -14,16 +14,25 @@ export async function exportGuideAsMarkdown(
     ...(domain ? [i18n.t('export.sourceLabel', [domain])] : []),
   ].join(' · ');
 
+  const imageData = await Promise.all(
+    steps.map(async (step) => {
+      const screenshot = screenshots.get(step.id);
+      if (!screenshot) return null;
+      const b64 = await blobToBase64(screenshot.blob);
+      return { stepId: step.id, b64, mimeType: screenshot.mimeType };
+    }),
+  );
+  const imageMap = new Map(imageData.filter(Boolean).map((img) => [img!.stepId, img!]));
+
   const lines: string[] = [`# ${guide.title}`, '', `*${meta}*`, '', '---', ''];
 
   for (const step of steps) {
     const num = String(step.index + 1).padStart(2, '0');
     lines.push(`## ${i18n.t('export.stepLabel', [num])}: ${step.description}`, '');
 
-    const screenshot = screenshots.get(step.id);
-    if (screenshot) {
-      const b64 = await blobToBase64(screenshot.blob);
-      lines.push(`![${i18n.t('export.stepLabel', [num])}](data:${screenshot.mimeType};base64,${b64})`, '');
+    const img = imageMap.get(step.id);
+    if (img) {
+      lines.push(`![${i18n.t('export.stepLabel', [num])}](data:${img.mimeType};base64,${img.b64})`, '');
     }
   }
 

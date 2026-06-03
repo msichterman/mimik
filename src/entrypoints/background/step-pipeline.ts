@@ -90,11 +90,9 @@ export async function handleCaptureStep(data: CaptureStepData): Promise<CaptureS
   }
 
   if (data.action !== 'input' && data.domContext) {
-    try {
-      await tryAIDescription(stepId, data.domContext);
-    } catch (err) {
+    tryAIDescription(stepId, data.domContext).catch((err) => {
       logger.error('AI description failed', err);
-    }
+    });
   }
 
   return { stepId };
@@ -118,10 +116,8 @@ export async function handleFinalizeInputStep(
   await db.steps.update(stepId, updates);
 
   if (domContext) {
-    try {
-      await tryAIDescription(stepId, domContext);
-    } catch (err) {
+    tryAIDescription(stepId, domContext).catch((err) => {
       logger.error('AI description failed on finalize', err);
-    }
+    });
   }
 }

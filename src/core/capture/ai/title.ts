@@ -21,6 +21,7 @@ export async function generateGuideTitle(
       model: createModel(provider, model, apiKey),
       prompt: GUIDE_TITLE_PROMPT.replace('{{steps}}', formatted) + getLanguageSuffix(locale),
       maxOutputTokens: 30,
+      abortSignal: AbortSignal.timeout(20000),
     });
     let title = text.trim().replace(/^"|"$/g, '');
     if (title.length > 70) title = `${title.slice(0, 67)}...`;
