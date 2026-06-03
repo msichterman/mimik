@@ -1,0 +1,13 @@
+diff --git a/dist/core/runners/manual.mjs b/dist/core/runners/manual.mjs
+index a62cb52165e00c874c120cd6b52e91e28d065aad..fca1589726b03b84ba7d08d12de77807d312dd01 100644
+--- a/dist/core/runners/manual.mjs
++++ b/dist/core/runners/manual.mjs
+@@ -4,7 +4,7 @@ import { relative } from "node:path";
+ /** The manual runner tells the user to load the unpacked extension manually. */
+ function createManualRunner() {
+ 	return { async openBrowser() {
+-		wxt.logger.info(`Load "${relative(process.cwd(), wxt.config.outDir)}" as an unpacked extension manually`);
++		wxt.logger.info(`Load "${relative(process.cwd(), wxt.config.outDir)}" as an unpacked extension manually → chrome://extensions/`);
+ 	} };
+ }
+ //#endregion
